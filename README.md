@@ -1,2 +1,2 @@
 # python
-my python programs
+my college python assignments
