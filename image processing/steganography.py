@@ -1,15 +1,14 @@
-######################################################################################
-#### The following code uses concept of stegography and hides text entered in the ####
-#### specified image by replacing LSB of each pixel.                              ####
-######################################################################################
-
+"""
+The following code uses concept of stegography and hides text entered in the
+specified image by replacing LSB of each pixel
+"""
+import sys                   # to get size of text
 from PIL import Image       # for image related operations
 import numpy                # for array handling
-import sys                   # to get size of text
-import dipFuntions          # for self-written functions
+import dip_functions          # for self-written functions
 
-# hide text into image
 def hide(img_array, txt):
+    """hide text into image"""
     row = img_array.shape[0]    # get row of the image row
     col = img_array.shape[1]    # get column of the image row
     txt_bin = []                # this stores list of lists of text converted into binary
@@ -32,24 +31,24 @@ def hide(img_array, txt):
             # if number of iterations are less than the length of text1
             if count <= len(text1)-1:
                 # convert pixel value into binary and make a list of it
-                a = list(bin(img_array[r,t]))
+                a = list(bin(img_array[r, t]))
                 # replace LSB with text bit
                 a[len(a)-1] = text1[t]
                 a = "".join(a)
                 # store updated value in array
-                new_image_array.append(int(a,2))
+                new_image_array.append(int(a, 2))
                 count += 1
             else:
                 # store the unchanged value
-                new_image_array.append(img_array[r,t])
+                new_image_array.append(img_array[r, t])
     # converting list into array
     new_image_array = numpy.array(new_image_array)
     # reshaping array
     new_image_array = new_image_array.reshape(img_array.shape[0], img_array.shape[1])
     return new_image_array, len(text1)
 
-# extract text from image
 def unhide(img_array, txt):
+    """extract text from image"""
     row = img_array.shape[0]    # get row of the image row
     col = img_array.shape[1]    # get column of the image row
     ans = []                    # this stores intermediate answer
@@ -61,7 +60,7 @@ def unhide(img_array, txt):
             # if number of iterations are less than the length of txt
             if count <= txt-1:
                 # get pixel value and convert into binary
-                a = list(bin(img_array[r,t]))
+                a = list(bin(img_array[r, t]))
                 # store LSB in a list
                 ans.append(a[len(a)-1])
                 count += 1
@@ -69,14 +68,14 @@ def unhide(img_array, txt):
     c = []      # list to store converted data
     # iterate through the ans list and convert binary to char
     for i in range(len(ans)):
-            b += ans[i]
-            # if length of b == 7 because we are storing 7 bits (as we are excluding "0b") in hide()
-            # then break the string at 7
-            if len(b) == 7:
-                b = "0b"+b
-                # store the converted binary to string in list c
-                c.append(chr(int(b,2)))
-                b=""
+        b += ans[i]
+        # if length of b == 7 because we are storing 7 bits (as we are excluding "0b") in hide()
+        # then break the string at 7
+        if len(b) == 7:
+            b = "0b"+b
+            # store the converted binary to string in list c
+            c.append(chr(int(b, 2)))
+            b = ""
 
     return c
 
@@ -95,12 +94,12 @@ def main():
     image_original.show()
 
     # get the array of the image
-    image_array = dipFuntions.getImageArray(image_original)
+    image_array = dip_functions.get_image_array(image_original)
 
     # amount of data that can be hidden
     # here we divide by 7 because we are considering only 7 bits by excluding "0b"
     h = ((image_array.shape[0] * image_array.shape[1])/7)
-    print "Amount of data that can be hidden is: ", h, "B"
+    print("Amount of data that can be hidden is: ", h, "B")
 
     # get size of image in B
     txt_size = sys.getsizeof(text)
@@ -108,7 +107,7 @@ def main():
     # if data can be hidden
     if txt_size <= h:
         # hide data and get image array and hidden text
-        im_new,text_size = hide(image_array, text)
+        im_new, text_size = hide(image_array, text)
 
         # get updated image
         im = Image.fromarray(numpy.uint8(im_new))
@@ -116,14 +115,14 @@ def main():
         im.show()
 
         # unhide data
-        extracted_text = unhide(dipFuntions.getImageArray(im),text_size)
+        extracted_text = unhide(dip_functions.get_image_array(im),text_size)
 
         # print hidden data
         t = "".join(extracted_text)
-        print "The extracted text is:", t
+        print("The extracted text is:", t)
 
     # if data cannot be hidden
     else:
-        print "Text size is large than amount of data that can be hidden in the image."
+        print("Text size is large than amount of data that can be hidden in the image.")
 
 main()
